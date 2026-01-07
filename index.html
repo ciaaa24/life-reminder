@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Life Reminder</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+
+    <header class="app-header">
+        <div class="greeting-box">
+            <h2 id="greeting-text">Halo...</h2>
+            <p id="date-text">Senin, 1 Jan 2026</p>
+        </div>
+        <div class="profile-icon" onclick="openSettings()">
+            <i class="fa-solid fa-user-circle"></i>
+        </div>
+    </header>
+
+    <main class="app-content">
+        
+        <div id="view-home" class="view active">
+            <div class="summary-card">
+                <h3>Ringkasan Hari Ini</h3>
+                <div class="stats-grid">
+                    <div class="stat-item" onclick="switchTab('reminder')">
+                        <i class="fa-solid fa-bell" style="color: #F59E0B;"></i>
+                        <span id="count-reminder">0</span>
+                        <small>Reminder</small>
+                    </div>
+                    <div class="stat-item" onclick="switchTab('chores')">
+                        <i class="fa-solid fa-home" style="color: #3B82F6;"></i>
+                        <span id="count-chores">0</span>
+                        <small>Tugas</small>
+                    </div>
+                    <div class="stat-item" onclick="switchTab('titipan')">
+                        <i class="fa-solid fa-box-open" style="color: #EC4899;"></i>
+                        <span id="count-titipan">0</span>
+                        <small>Titipan</small>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section-title">Akses Cepat</div>
+            <div class="quick-actions">
+                <button onclick="openModal('modal-reminder')"><i class="fa-solid fa-plus"></i> Reminder</button>
+                <button onclick="openModal('modal-chores')"><i class="fa-solid fa-plus"></i> Tugas Rumah</button>
+                <button onclick="openModal('modal-titipan')"><i class="fa-solid fa-plus"></i> Titipan</button>
+            </div>
+        </div>
+
+        <div id="view-reminder" class="view">
+            <div class="page-header">
+                <h2>🔔 Reminder Aktivitas</h2>
+                <button class="btn-add-mini" onclick="openModal('modal-reminder')">+</button>
+            </div>
+            <div id="list-reminder" class="list-container"></div>
+        </div>
+
+        <div id="view-chores" class="view">
+            <div class="page-header">
+                <h2>🏠 Tugas Rumah</h2>
+                <button class="btn-add-mini" onclick="openModal('modal-chores')">+</button>
+            </div>
+            <div id="list-chores" class="list-container"></div>
+        </div>
+
+        <div id="view-titipan" class="view">
+            <div class="page-header">
+                <h2>📦 Titipan Barang</h2>
+                <button class="btn-add-mini" onclick="openModal('modal-titipan')">+</button>
+            </div>
+            <input type="text" id="search-titipan" placeholder="🔍 Cari titipan..." onkeyup="renderTitipan()">
+            <div id="list-titipan" class="list-container"></div>
+        </div>
+
+    </main>
+
+    <nav class="bottom-nav">
+        <a href="#" class="nav-item active" onclick="switchTab('home')">
+            <i class="fa-solid fa-house"></i>
+            <span>Home</span>
+        </a>
+        <a href="#" class="nav-item" onclick="switchTab('reminder')">
+            <i class="fa-solid fa-bell"></i>
+            <span>Reminder</span>
+        </a>
+        <a href="#" class="nav-item" onclick="switchTab('chores')">
+            <i class="fa-solid fa-broom"></i>
+            <span>Tugas</span>
+        </a>
+        <a href="#" class="nav-item" onclick="switchTab('titipan')">
+            <i class="fa-solid fa-box"></i>
+            <span>Titipan</span>
+        </a>
+    </nav>
+
+    <div id="modal-reminder" class="modal">
+        <div class="modal-content">
+            <h3>Tambah Reminder</h3>
+            <input type="text" id="rem-judul" placeholder="Judul (mis: Belajar DSA)">
+            <select id="rem-kategori">
+                <option value="📚 Belajar">📚 Belajar</option>
+                <option value="🎓 Kuliah">🎓 Kuliah</option>
+                <option value="💬 Janji">💬 Janji</option>
+                <option value="🛐 Ibadah">🛐 Ibadah</option>
+            </select>
+            <input type="datetime-local" id="rem-waktu">
+            <textarea id="rem-catatan" placeholder="Catatan opsional..."></textarea>
+            <div class="modal-actions">
+                <button class="btn-cancel" onclick="closeModal('modal-reminder')">Batal</button>
+                <button class="btn-save" onclick="addReminder()">Simpan</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-chores" class="modal">
+        <div class="modal-content">
+            <h3>Tambah Tugas Rumah</h3>
+            <input type="text" id="chore-judul" placeholder="Mis: Menyapu, Setrika...">
+            <div class="modal-actions">
+                <button class="btn-cancel" onclick="closeModal('modal-chores')">Batal</button>
+                <button class="btn-save" onclick="addChore()">Simpan</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-titipan" class="modal">
+        <div class="modal-content">
+            <h3>Catat Titipan</h3>
+            <input type="text" id="titip-barang" placeholder="Nama Barang (mis: Jaket)">
+            <input type="text" id="titip-dari" placeholder="Dari Siapa?">
+            <select id="titip-jenis">
+                <option value="🍱 Makanan">🍱 Makanan/Minuman</option>
+                <option value="👕 Pakaian">👕 Baju/Kemeja</option>
+                <option value="📄 Dokumen">📄 Dokumen/Barang</option>
+            </select>
+            <label>Harus diapakan?</label>
+            <select id="titip-aksi">
+                <option value="Disimpan">Disimpan</option>
+                <option value="Dicuci">Dicuci</option>
+                <option value="Dikirim">Dikirim</option>
+                <option value="Diberikan">Diberikan ke orang lain</option>
+            </select>
+            <textarea id="titip-ket" placeholder="Keterangan tambahan..."></textarea>
+            
+            <div class="priority-check">
+                <input type="checkbox" id="titip-urgent"> <label for="titip-urgent" style="color:var(--danger)">Tandai Urgent!</label>
+            </div>
+
+            <div class="modal-actions">
+                <button class="btn-cancel" onclick="closeModal('modal-titipan')">Batal</button>
+                <button class="btn-save" onclick="addTitipan()">Simpan</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
