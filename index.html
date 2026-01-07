@@ -101,15 +101,22 @@
     <div id="modal-reminder" class="modal">
         <div class="modal-content">
             <h3>Tambah Reminder</h3>
+            
             <input type="text" id="rem-judul" placeholder="Judul (mis: Belajar DSA)">
+            
             <select id="rem-kategori">
                 <option value="📚 Belajar">📚 Belajar</option>
                 <option value="🎓 Kuliah">🎓 Kuliah</option>
                 <option value="💬 Janji">💬 Janji</option>
                 <option value="🛐 Ibadah">🛐 Ibadah</option>
+                
+                <option value="🏥 Kesehatan">🏥 Kesehatan</option>
+                <option value="✨ Lainnya">✨ Lainnya</option>
             </select>
+
             <input type="datetime-local" id="rem-waktu">
             <textarea id="rem-catatan" placeholder="Catatan opsional..."></textarea>
+            
             <div class="modal-actions">
                 <button class="btn-cancel" onclick="closeModal('modal-reminder')">Batal</button>
                 <button class="btn-save" onclick="addReminder()">Simpan</button>

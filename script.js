@@ -147,18 +147,32 @@ function renderTitipan() {
 // --- ADD ITEM FUNCTIONS ---
 
 function addReminder() {
-    const judul = document.getElementById('rem-judul').value;
+   const judul = document.getElementById('rem-judul').value;
     const kategori = document.getElementById('rem-kategori').value;
     const waktu = document.getElementById('rem-waktu').value;
     const catatan = document.getElementById('rem-catatan').value;
 
     if(!judul || !waktu) return alert("Judul dan Waktu wajib diisi!");
 
-    reminders.push({ id: Date.now(), judul, kategori, waktu, catatan, done: false });
+    // TAMBAHKAN properti 'notified: false' di sini
+    reminders.push({ 
+        id: Date.now(), 
+        judul, 
+        kategori, 
+        waktu, 
+        catatan, 
+        done: false, 
+        notified: false // <-- Penting untuk logika notifikasi
+    });
+    
     saveData();
     closeModal('modal-reminder');
-    // Reset form
     document.getElementById('rem-judul').value = '';
+    
+    // Minta izin notifikasi lagi (jaga-jaga kalau user tadi menolak/lupa)
+    if (Notification.permission !== "granted") {
+        Notification.requestPermission();
+    }
 }
 
 function addChore() {
@@ -245,4 +259,54 @@ function openSettings() {
         localStorage.setItem('userName', newName);
         location.reload();
     }
+}
+
+/* --- FITUR NOTIFIKASI OTOMATIS (AUTO REMINDER) --- */
+
+// 1. Minta Izin Notifikasi saat Aplikasi Dibuka
+if ("Notification" in window) {
+    // Jika user belum pernah ditanya, minta izin
+    if (Notification.permission !== "granted" && Notification.permission !== "denied") {
+        Notification.requestPermission().then(permission => {
+            if (permission === "granted") {
+                console.log("Notifikasi diizinkan!");
+            }
+        });
+    }
+}
+
+// 2. Fungsi Cek Jadwal (Jalan setiap 1 menit)
+setInterval(() => {
+    checkReminders();
+}, 60000); // 60000 ms = 1 menit
+
+function checkReminders() {
+    // Ambil waktu sekarang format: YYYY-MM-DDTHH:MM
+    const now = new Date();
+    // Trik konversi waktu lokal Indonesia ke format input datetime-local
+    // (Menggeser waktu sesuai zona waktu user agar pas)
+    const offset = now.getTimezoneOffset() * 60000;
+    const localISOTime = (new Date(now - offset)).toISOString().slice(0, 16);
+
+    // Cek semua reminder
+    reminders.forEach(item => {
+        // Jika waktu sama persis DAN belum selesai DAN belum dinotifikasi
+        if (item.waktu === localISOTime && !item.done && !item.notified) {
+            
+            // A. Tampilkan Notifikasi Browser (Pop-up System)
+            if (Notification.permission === "granted") {
+                new Notification(`🔔 Waktunya: ${item.judul}`, {
+                    body: item.catatan || `Kategori: ${item.kategori}`,
+                    icon: "https://cdn-icons-png.flaticon.com/512/3239/3239952.png" // Ikon Lonceng
+                });
+            }
+
+            // B. Tampilkan Alert di dalam Aplikasi (Backup)
+            alert(`🔔 REMINDER!\n\nWaktunya: ${item.judul}\n(${item.kategori})`);
+
+            // Tandai sudah dinotifikasi agar tidak spam alert berkali-kali
+            item.notified = true;
+            saveData();
+        }
+    });
 }
