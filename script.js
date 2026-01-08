@@ -281,30 +281,28 @@ setInterval(() => {
 }, 60000); // 60000 ms = 1 menit
 
 function checkReminders() {
-    // Ambil waktu sekarang format: YYYY-MM-DDTHH:MM
     const now = new Date();
-    // Trik konversi waktu lokal Indonesia ke format input datetime-local
-    // (Menggeser waktu sesuai zona waktu user agar pas)
+    // Konversi waktu sekarang ke format string yang sama dengan input (YYYY-MM-DDTHH:MM)
     const offset = now.getTimezoneOffset() * 60000;
     const localISOTime = (new Date(now - offset)).toISOString().slice(0, 16);
 
-    // Cek semua reminder
     reminders.forEach(item => {
-        // Jika waktu sama persis DAN belum selesai DAN belum dinotifikasi
-        if (item.waktu === localISOTime && !item.done && !item.notified) {
+        // PERUBAHAN LOGIKA: Gunakan operator "<=" (Kurang dari atau sama dengan)
+        // Artinya: Jika waktu reminder sudah lewat atau pas sekarang
+        if (item.waktu <= localISOTime && !item.done && !item.notified) {
             
-            // A. Tampilkan Notifikasi Browser (Pop-up System)
+            // 1. Coba Notifikasi Browser
             if (Notification.permission === "granted") {
                 new Notification(`🔔 Waktunya: ${item.judul}`, {
                     body: item.catatan || `Kategori: ${item.kategori}`,
-                    icon: "https://cdn-icons-png.flaticon.com/512/3239/3239952.png" // Ikon Lonceng
+                    // Ikon opsional
                 });
+            } else {
+                // 2. Jika notifikasi browser diblokir, pakai Alert biasa
+                alert(`🔔 REMINDER!\n\n${item.judul}\n(${item.kategori})`);
             }
 
-            // B. Tampilkan Alert di dalam Aplikasi (Backup)
-            alert(`🔔 REMINDER!\n\nWaktunya: ${item.judul}\n(${item.kategori})`);
-
-            // Tandai sudah dinotifikasi agar tidak spam alert berkali-kali
+            // Update status agar tidak bunyi terus menerus
             item.notified = true;
             saveData();
         }
